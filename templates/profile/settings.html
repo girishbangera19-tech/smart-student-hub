@@ -1,0 +1,24 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, field %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+{{ page_head('Settings') }}
+<div class="row g-4">
+  <div class="col-lg-6"><div class="card-box">
+    <header><h2><i class="bi bi-moon-stars"></i> Theme</h2></header>
+    <form method="post" class="d-flex gap-2">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn {{ 'btn-primary' if current_user.theme == 'light' else 'btn-outline-primary' }}" name="theme" value="light"><i class="bi bi-sun"></i> Light</button>
+      <button class="btn {{ 'btn-primary' if current_user.theme == 'dark' else 'btn-outline-primary' }}" name="theme" value="dark"><i class="bi bi-moon"></i> Dark</button>
+    </form></div></div>
+  <div class="col-lg-6"><div class="card-box">
+    <header><h2><i class="bi bi-shield-lock"></i> Change password</h2></header>
+    <form method="post" action="{{ url_for('profile.password') }}" data-loading-form>
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="mb-3">{{ field('Current password', 'current_password', '', 'password', True, attrs='autocomplete="current-password"') }}</div>
+      <div class="mb-3">{{ field('New password', 'new_password', '', 'password', True, help='At least 8 characters.', attrs='minlength="8" autocomplete="new-password"') }}</div>
+      <div class="mb-3">{{ field('Confirm new password', 'confirm_password', '', 'password', True, attrs='autocomplete="new-password"') }}</div>
+      <button class="btn btn-primary" type="submit">Update password</button>
+    </form></div></div>
+</div>
+{% endblock %}

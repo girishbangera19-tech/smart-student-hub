@@ -1,0 +1,203 @@
+{% extends "app_layout.html" %}
+{% block title %}Dashboard{% endblock %}
+
+{# Small helper: show a "View all" link only when that page exists #}
+{% macro view_all(endpoint, text='View all') %}
+  {% if endpoint_exists(endpoint) %}<a href="{{ url_for(endpoint) }}" class="card-link">{{ text }} <i class="bi bi-arrow-right"></i></a>{% endif %}
+{% endmacro %}
+
+{% macro empty(icon, title, text) %}
+  <div class="empty-state"><i class="bi {{ icon }}"></i><strong>{{ title }}</strong><span>{{ text }}</span></div>
+{% endmacro %}
+
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ greeting }}, {{ current_user.full_name.split(' ')[0] }}!</h1>
+    <p>
+      {{ current_user.branch }} &middot; Semester {{ current_user.semester }}
+      {% if next_exam %}&middot; <strong>{{ next_exam.days_remaining }}</strong> day{{ '' if next_exam.days_remaining == 1 else 's' }} until {{ next_exam.subject_name }}{% endif %}
+    </p>
+  </div>
+</div>
+
+<!-- Summary cards: every number is counted from the database -->
+<div class="row g-3 mb-4">
+  {% set cards = [
+    ('Classes Today', stats.classes_today, 'bi-calendar3-week', 'indigo', 'timetable.index'),
+    ('Upcoming Exams', stats.upcoming_exams, 'bi-journal-check', 'blue', 'exams.index'),
+    ('Pending Assignments', stats.pending_assignments, 'bi-clipboard-check', 'amber', 'assignments.index'),
+    ('Tasks Due Soon', stats.tasks_due_soon, 'bi-check2-square', 'red', 'tasks.index'),
+    ('Study Materials', stats.materials, 'bi-folder2-open', 'green', 'materials.index'),
+    ('Placement Openings', stats.opportunities, 'bi-briefcase', 'violet', 'placements.index')
+  ] %}
+  {% for label, value, icon, tone, endpoint in cards %}
+  <div class="col-6 col-md-4 col-xl-2">
+    {% if endpoint_exists(endpoint) %}
+    <a href="{{ url_for(endpoint) }}" class="stat-card">
+      <span class="stat-icon tone-{{ tone }}"><i class="bi {{ icon }}"></i></span>
+      <strong class="stat-value">{{ value }}</strong>
+      <span class="stat-label">{{ label }}</span>
+    </a>
+    {% else %}
+    <div class="stat-card">
+      <span class="stat-icon tone-{{ tone }}"><i class="bi {{ icon }}"></i></span>
+      <strong class="stat-value">{{ value }}</strong>
+      <span class="stat-label">{{ label }}</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4">
+  <!-- Left column -->
+  <div class="col-xl-8">
+    <div class="row g-4">
+
+      <div class="col-md-6">
+        <section class="card-box h-100">
+          <header><h2><i class="bi bi-calendar3-week"></i> Today's Classes</h2>{{ view_all('timetable.index', 'Timetable') }}</header>
+          {% if todays_classes %}
+            <ul class="item-list">
+              {% for c in todays_classes %}
+              <li>
+                <span class="time-chip">{{ c.start_time.strftime('%I:%M %p').lstrip('0') }}<small>to {{ c.end_time.strftime('%I:%M %p').lstrip('0') }}</small></span>
+                <div><strong>{{ c.subject_name }}</strong><small>{{ c.room or 'Room not set' }}</small></div>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            {{ empty('bi-cup-hot', 'No classes today', 'Add your weekly timetable to see today\'s classes here.') }}
+          {% endif %}
+        </section>
+      </div>
+
+      <div class="col-md-6">
+        <section class="card-box h-100">
+          <header><h2><i class="bi bi-journal-check"></i> Upcoming Examinations</h2>{{ view_all('exams.index') }}</header>
+          {% if upcoming_exams %}
+            <ul class="item-list">
+              {% for e in upcoming_exams %}
+              <li>
+                <span class="date-chip">{{ e.exam_date.strftime('%d') }}<small>{{ e.exam_date.strftime('%b') }}</small></span>
+                <div><strong>{{ e.subject_name }}</strong><small>{{ e.subject_code or '' }}{% if e.session %} &middot; {{ e.session }}{% endif %}</small></div>
+                <span class="tag {{ 'tag-danger' if e.days_remaining <= 3 else 'tag-muted' }}">
+                  {{ 'Today' if e.days_remaining == 0 else e.days_remaining ~ ' d' }}
+                </span>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            {{ empty('bi-journal-text', 'No upcoming exams', 'Add exam dates manually to start a countdown.') }}
+          {% endif %}
+        </section>
+      </div>
+
+      <div class="col-md-6">
+        <section class="card-box h-100">
+          <header><h2><i class="bi bi-clipboard-check"></i> Assignment Deadlines</h2>{{ view_all('assignments.index') }}</header>
+          {% if due_24h %}
+            <div class="notice notice-warning"><i class="bi bi-alarm"></i> {{ due_24h|length }} due within 24 hours</div>
+          {% endif %}
+          {% if open_assignments %}
+            <ul class="item-list">
+              {% for a in open_assignments %}
+              <li>
+                <span class="status-dot {{ 'dot-danger' if a.is_overdue else ('dot-blue' if a.status == 'In Progress' else 'dot-amber') }}"></span>
+                <div><strong>{{ a.title }}</strong><small>{{ a.subject_name }} &middot; {{ a.deadline.strftime('%d %b, %I:%M %p') }}</small></div>
+                {% if a.is_overdue %}<span class="tag tag-danger">Overdue</span>{% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            {{ empty('bi-emoji-smile', 'All caught up', 'No pending assignments right now.') }}
+          {% endif %}
+        </section>
+      </div>
+
+      <div class="col-md-6">
+        <section class="card-box h-100">
+          <header><h2><i class="bi bi-check2-square"></i> Today's Tasks</h2>{{ view_all('tasks.index') }}</header>
+          {% if todays_tasks %}
+            <ul class="item-list">
+              {% for t in todays_tasks %}
+              <li>
+                {# Checkbox calls the tasks.toggle route (added in Stage 2). Disabled until then. #}
+                <input class="form-check-input task-check" type="checkbox" {% if t.is_completed %}checked{% endif %}
+                       {% if endpoint_exists('tasks.toggle') %}data-url="{{ url_for('tasks.toggle', task_id=t.id) }}"{% else %}disabled{% endif %}
+                       aria-label="Mark {{ t.title }} complete">
+                <div class="{{ 'done' if t.is_completed }}"><strong>{{ t.title }}</strong><small>{{ t.category or 'General' }}{% if t.due_time %} &middot; {{ t.due_time.strftime('%I:%M %p').lstrip('0') }}{% endif %}</small></div>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            {{ empty('bi-list-check', 'Nothing due today', 'Tasks with today\'s date will appear here.') }}
+          {% endif %}
+        </section>
+      </div>
+
+      <div class="col-md-6">
+        <section class="card-box h-100">
+          <header><h2><i class="bi bi-folder2-open"></i> Recent Study Materials</h2>{{ view_all('materials.index') }}</header>
+          {% if recent_materials %}
+            <ul class="item-list">
+              {% for m in recent_materials %}
+              <li>
+                <span class="file-icon"><i class="bi bi-file-earmark-pdf"></i></span>
+                <div><strong>{{ m.title }}</strong><small>{{ m.subject_name }} &middot; {{ m.resource_type }}</small></div>
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            {{ empty('bi-cloud-arrow-up', 'No materials yet', 'Upload your own notes and PDFs to build your library.') }}
+          {% endif %}
+        </section>
+      </div>
+
+      <div class="col-md-6">
+        <section class="card-box h-100">
+          <header><h2><i class="bi bi-briefcase"></i> Placement Opportunities</h2>{{ view_all('placements.index') }}</header>
+          {% if opportunities %}
+            <ul class="item-list">
+              {% for o in opportunities %}
+              <li>
+                <span class="file-icon tone-violet"><i class="bi bi-building"></i></span>
+                <div><strong>{{ o.job_title }}</strong><small>{{ o.company_name }}{% if o.deadline %} &middot; apply by {{ o.deadline.strftime('%d %b') }}{% endif %}</small></div>
+                {% if not o.is_verified %}<span class="tag tag-muted">Unverified</span>{% endif %}
+              </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            {{ empty('bi-briefcase', 'No openings listed', 'Listings you add will show up here.') }}
+          {% endif %}
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column: progress charts -->
+  <div class="col-xl-4">
+    <section class="card-box mb-4">
+      <header><h2><i class="bi bi-graph-up"></i> Academic Progress</h2></header>
+      {% if has_chart_data %}
+        <p class="chart-title">Assignments</p>
+        <div class="chart-box"><canvas id="assignmentChart" aria-label="Assignment completion chart" role="img"></canvas></div>
+        <p class="chart-title mt-4">Tasks</p>
+        <div class="chart-box"><canvas id="taskChart" aria-label="Task completion chart" role="img"></canvas></div>
+      {% else %}
+        {{ empty('bi-bar-chart', 'No progress data yet', 'Add assignments or tasks and your progress charts will appear.') }}
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% if has_chart_data %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  {# Pass server data to JavaScript safely as JSON #}
+  <script id="chart-data" type="application/json">{{ chart|tojson }}</script>
+{% endif %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

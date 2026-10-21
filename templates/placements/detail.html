@@ -1,0 +1,39 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, delete_button, action_button, select %}
+{% block title %}{{ item.job_title }}{% endblock %}
+{% block content %}
+{% call page_head(item.job_title, item.company_name) %}
+  {% if item.application_url %}<a class="btn btn-primary" target="_blank" rel="noopener noreferrer" href="{{ item.application_url }}"><i class="bi bi-box-arrow-up-right"></i> Apply</a>{% endif %}
+  {% if can_edit %}<a class="btn btn-outline-primary" href="{{ url_for('placements.edit', item_id=item.id) }}"><i class="bi bi-pencil"></i> Edit</a>
+  {{ delete_button(url_for('placements.delete', item_id=item.id), 'Delete this opportunity for everyone?') }}{% endif %}
+{% endcall %}
+<div class="row g-4">
+  <div class="col-lg-8"><div class="form-card" style="max-width:none">
+    <p>{% if item.is_verified %}<span class="tag tag-success">Verified</span>{% else %}<span class="tag tag-muted">Unverified - confirm on the company's official page</span>{% endif %}
+      {% if item.is_expired %}<span class="tag tag-danger">Expired</span>{% endif %}</p>
+    <dl class="detail-grid">
+      <div><dt>Package</dt><dd>{{ item.salary_package or '-' }}</dd></div>
+      <div><dt>Location</dt><dd>{{ item.location or '-' }}</dd></div>
+      <div><dt>Type</dt><dd>{{ item.employment_type or '-' }}</dd></div>
+      <div><dt>Min CGPA</dt><dd>{{ item.min_cgpa if item.min_cgpa is not none else '-' }}</dd></div>
+      <div><dt>Deadline</dt><dd>{{ item.deadline.strftime('%d %b %Y') if item.deadline else '-' }}</dd></div>
+      <div><dt>Branches</dt><dd>{{ item.eligible_branches or '-' }}</dd></div>
+    </dl>
+    <h2 class="h6">Skills</h2><p>{{ item.required_skills or '-' }}</p>
+    <h2 class="h6">Eligibility</h2><p class="prose">{{ item.eligibility or '-' }}</p>
+    <h2 class="h6">Description</h2><p class="prose mb-0">{{ item.description or '-' }}</p>
+  </div></div>
+  <div class="col-lg-4"><div class="card-box">
+    <header><h2><i class="bi bi-flag"></i> My application</h2></header>
+    <p class="small text-muted-2">Only you can see this.</p>
+    <form method="post" action="{{ url_for('placements.track', item_id=item.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="mb-2">{{ select('Status', 'status', statuses, app.status if app else 'Interested') }}</div>
+      <div class="mb-3"><label class="form-label" for="notes">Notes</label><textarea class="form-control" id="notes" name="notes" rows="3">{{ app.notes if app and app.notes else '' }}</textarea></div>
+      <button class="btn btn-primary btn-sm" type="submit">{{ 'Update status' if app else 'Start tracking' }}</button>
+    </form>
+    {% if app %}<div class="mt-2">{{ action_button(url_for('placements.untrack', item_id=item.id), 'Stop tracking', 'bi-x-lg', 'btn btn-sm btn-ghost') }}</div>{% endif %}
+  </div></div>
+</div>
+<a class="btn btn-ghost mt-3" href="{{ url_for('placements.index') }}"><i class="bi bi-arrow-left"></i> Back</a>
+{% endblock %}

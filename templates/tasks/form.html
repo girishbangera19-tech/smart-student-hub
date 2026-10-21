@@ -1,0 +1,21 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, field, textarea, select, form_buttons %}
+{% block title %}{{ 'Edit task' if task else 'Add task' }}{% endblock %}
+{% block content %}
+{{ page_head('Edit task' if task else 'Add task') }}
+<div class="form-card"><form method="post" novalidate data-loading-form>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-3">
+    <div class="col-12">{{ field('Title', 'title', form.get('title'), required=True) }}</div>
+    <div class="col-12">{{ textarea('Description', 'description', form.get('description'), 3) }}</div>
+    <div class="col-md-4">{{ field('Due date', 'due_date', form.get('due_date'), 'date') }}</div>
+    <div class="col-md-4">{{ field('Due time (optional)', 'due_time', form.get('due_time'), 'time') }}</div>
+    <div class="col-md-4">{{ select('Priority', 'priority', priorities, form.get('priority', 'Medium'), True) }}</div>
+    <div class="col-md-6">{{ select('Category', 'category', categories, form.get('category', 'General')) }}</div>
+    <div class="col-md-6 d-flex align-items-end">
+      <div class="form-check"><input class="form-check-input" type="checkbox" id="is_completed" name="is_completed" value="1" {{ 'checked' if form.get('is_completed') }}>
+      <label class="form-check-label" for="is_completed">Already completed</label></div></div>
+  </div>
+  {{ form_buttons(url_for('tasks.index'), 'Save changes' if task else 'Add task') }}
+</form></div>
+{% endblock %}

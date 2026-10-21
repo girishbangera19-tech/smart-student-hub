@@ -1,0 +1,22 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, action_button, empty_state %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+{% call page_head('Notifications', 'In-app reminders for deadlines. Nothing is sent by email or push.') %}
+  {% if unread %}{{ action_button(url_for('notifications.mark_all_read'), 'Mark all as read', 'bi-check2-all', 'btn btn-outline-primary') }}{% endif %}
+{% endcall %}
+<div class="pill-tabs">
+  <a class="{{ 'active' if show == 'all' }}" href="{{ url_for('notifications.index') }}">All</a>
+  <a class="{{ 'active' if show == 'unread' }}" href="{{ url_for('notifications.index', show='unread') }}">Unread ({{ unread }})</a>
+</div>
+{% for n in items %}
+<div class="notif {{ 'unread' if not n.is_read }}">
+  <span class="icon"><i class="bi bi-{{ {'assignment': 'clipboard-check', 'exam': 'journal-check', 'task': 'check2-square'}.get(n.kind, 'bell') }}"></i></span>
+  <div class="body"><strong>{{ n.title }}</strong><div>{{ n.message }}</div>
+    <small>{{ n.created_at.strftime('%d %b %Y, %H:%M') }} UTC{% if n.link %} &middot; <a href="{{ n.link }}">Open</a>{% endif %}</small></div>
+  {% if not n.is_read %}{{ action_button(url_for('notifications.mark_read', notification_id=n.id), 'Mark read', 'bi-check', 'btn btn-sm btn-outline-secondary') }}{% endif %}
+</div>
+{% else %}
+  {{ empty_state('bi-bell-slash', 'No notifications', 'Reminders appear here when deadlines get close.') }}
+{% endfor %}
+{% endblock %}

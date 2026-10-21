@@ -1,0 +1,45 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, delete_button, empty_state %}
+{% block title %}Class Timetable{% endblock %}
+
+{% block content %}
+{% call page_head('Class Timetable', 'Your weekly schedule. Overlapping classes are blocked automatically.') %}
+  <a class="btn btn-primary" href="{{ url_for('timetable.new', day=selected if selected != 'all' else '') }}"><i class="bi bi-plus-lg"></i> Add class</a>
+{% endcall %}
+
+<div class="pill-tabs">
+  <a href="{{ url_for('timetable.index') }}" class="{{ 'active' if selected == 'all' }}">All days</a>
+  {% for name in days %}
+    <a href="{{ url_for('timetable.index', day=loop.index0) }}" class="{{ 'active' if selected == loop.index0 }}">{{ name[:3] }}</a>
+  {% endfor %}
+</div>
+
+{% if total == 0 %}
+  {{ empty_state('bi-calendar3-week', 'Your timetable is empty', 'Add your first class to see it here and on your dashboard.', url_for('timetable.new'), 'Add class') }}
+{% else %}
+<div class="row g-3">
+  {% for d in visible_days %}
+  <div class="col-md-6 {{ 'col-xl-4' if selected == 'all' else 'col-xl-6' }}">
+    <div class="day-card {{ 'today' if d == today_idx }}">
+      <h3>{{ days[d] }} {% if d == today_idx %}<span class="tag tag-primary">Today</span>{% endif %}</h3>
+      {% for c in grouped[d] %}
+        <div class="class-item subj-{{ colors[c.id] }}" data-searchable>
+          <strong>{{ c.subject_name }}{% if c.subject_code %} <small style="display:inline">({{ c.subject_code }})</small>{% endif %}</strong>
+          <small><i class="bi bi-clock"></i> {{ c.start_time.strftime('%I:%M %p').lstrip('0') }} - {{ c.end_time.strftime('%I:%M %p').lstrip('0') }}</small>
+          {% if c.room %}<small><i class="bi bi-geo-alt"></i> {{ c.room }}</small>{% endif %}
+          {% if c.faculty_name %}<small><i class="bi bi-person"></i> {{ c.faculty_name }}</small>{% endif %}
+          {% if c.notes %}<small><i class="bi bi-sticky"></i> {{ c.notes }}</small>{% endif %}
+          <div class="actions">
+            <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('timetable.edit', entry_id=c.id) }}"><i class="bi bi-pencil"></i> Edit</a>
+            {{ delete_button(url_for('timetable.delete', entry_id=c.id), 'Delete ' ~ c.subject_name ~ ' from your timetable?') }}
+          </div>
+        </div>
+      {% else %}
+        <p class="text-muted-2 small mb-0">No classes.</p>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

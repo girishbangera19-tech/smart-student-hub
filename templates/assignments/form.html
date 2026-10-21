@@ -1,0 +1,20 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, field, textarea, select, form_buttons %}
+{% block title %}{{ 'Edit assignment' if assignment else 'Add assignment' }}{% endblock %}
+{% block content %}
+{{ page_head('Edit assignment' if assignment else 'Add assignment') }}
+<div class="form-card"><form method="post" novalidate data-loading-form>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-3">
+    <div class="col-12">{{ field('Title', 'title', form.get('title'), required=True) }}</div>
+    <div class="col-md-8">{{ field('Subject', 'subject_name', form.get('subject_name'), required=True) }}</div>
+    <div class="col-md-4">{{ field('Subject code', 'subject_code', form.get('subject_code')) }}</div>
+    <div class="col-md-6">{{ field('Assigned date', 'assigned_date', form.get('assigned_date'), 'date') }}</div>
+    <div class="col-md-6">{{ field('Due date and time', 'deadline', form.get('deadline'), 'datetime-local', True) }}</div>
+    <div class="col-md-6">{{ select('Priority', 'priority', priorities, form.get('priority', 'Medium'), True) }}</div>
+    <div class="col-md-6">{{ select('Status', 'status', statuses, form.get('status', 'Pending'), True) }}</div>
+    <div class="col-12">{{ textarea('Description', 'description', form.get('description'), 4) }}</div>
+  </div>
+  {{ form_buttons(url_for('assignments.index'), 'Save changes' if assignment else 'Add assignment') }}
+</form></div>
+{% endblock %}

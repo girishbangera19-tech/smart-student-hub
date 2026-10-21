@@ -1,0 +1,24 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, field, textarea, select, form_buttons %}
+{% block title %}{{ 'Edit exam' if exam else 'Add exam' }}{% endblock %}
+{% block content %}
+{{ page_head('Edit exam' if exam else 'Add exam', 'Copy the date from your official VTU timetable. Official schedules are not fetched automatically.') }}
+<div class="form-card"><form method="post" novalidate data-loading-form>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-3">
+    <div class="col-md-8">{{ field('Subject', 'subject_name', form.get('subject_name'), required=True) }}</div>
+    <div class="col-md-4">{{ field('Subject code', 'subject_code', form.get('subject_code'), placeholder='e.g. BCS503') }}</div>
+    <div class="col-md-4">{{ field('Exam date', 'exam_date', form.get('exam_date'), 'date', True) }}</div>
+    <div class="col-md-4">{{ field('Start time', 'start_time', form.get('start_time'), 'time') }}</div>
+    <div class="col-md-4">{{ field('End time', 'end_time', form.get('end_time'), 'time') }}</div>
+    <div class="col-md-4">{{ select('Session', 'session', sessions, form.get('session', ''), blank='Not set') }}</div>
+    <div class="col-md-4">{{ field('Semester', 'semester', form.get('semester'), 'number', attrs='min="1" max="8"') }}</div>
+    <div class="col-md-4">{{ field('Scheme', 'scheme', form.get('scheme')) }}</div>
+    <div class="col-12">{{ field('Venue', 'venue', form.get('venue')) }}</div>
+    <div class="col-md-8">{{ field('Source', 'source', form.get('source'), placeholder='e.g. VTU circular dated ...', help='Where did you get this date?') }}</div>
+    <div class="col-md-4">{{ select('Verification', 'verification_status', statuses, form.get('verification_status', 'Unverified')) }}</div>
+    <div class="col-12">{{ textarea('Notes', 'notes', form.get('notes'), 2) }}</div>
+  </div>
+  {{ form_buttons(url_for('exams.index'), 'Save changes' if exam else 'Add exam') }}
+</form></div>
+{% endblock %}

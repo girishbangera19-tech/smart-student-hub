@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Your Complete Academic Management Platform{% endblock %}
+
+{% block body %}
+<nav class="landing-nav navbar navbar-expand-lg sticky-top">
+  <div class="container">
+    <a class="brand" href="#home">
+      <span class="brand-mark"><i class="bi bi-mortarboard-fill"></i></span><span>Smart Student Hub</span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-label="Toggle navigation">
+      <i class="bi bi-list fs-2"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMenu">
+      <ul class="navbar-nav mx-auto">
+        <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+      </ul>
+      <div class="d-flex gap-2 mt-3 mt-lg-0">
+        <a class="btn btn-ghost" href="{{ url_for('auth.login') }}">Login</a>
+        <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Get Started</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero" id="home">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="pill"><i class="bi bi-stars"></i> Built for VTU engineering students</span>
+        <h1 class="hero-title">Your Entire Academic Life, One Smart Hub.</h1>
+        <p class="hero-sub">Manage your classes, VTU examinations, assignments, study materials, and placement preparation in one organized platform.</p>
+        <div class="d-flex flex-wrap gap-3">
+          <a class="btn btn-primary btn-lg" href="{{ url_for('auth.register') }}">Get Started</a>
+          <a class="btn btn-outline-primary btn-lg" href="#features">Explore Features</a>
+        </div>
+      </div>
+
+      <!-- Dashboard preview built with plain HTML + CSS (sample values, not real data) -->
+      <div class="col-lg-6">
+        <div class="preview" aria-hidden="true">
+          <div class="preview-bar"><span></span><span></span><span></span></div>
+          <div class="preview-body">
+            <div class="preview-side">
+              <i class="bi bi-grid-1x2 active"></i><i class="bi bi-calendar3-week"></i>
+              <i class="bi bi-clipboard-check"></i><i class="bi bi-folder2-open"></i><i class="bi bi-briefcase"></i>
+            </div>
+            <div class="preview-main">
+              <div class="preview-stats">
+                <div><small>Classes today</small><strong>4</strong></div>
+                <div><small>Next exam</small><strong>12 d</strong></div>
+                <div><small>Pending</small><strong>3</strong></div>
+              </div>
+              <div class="preview-card">
+                <div class="preview-row"><span class="bar b-indigo"></span><span>Data Structures</span><em>9:00</em></div>
+                <div class="preview-row"><span class="bar b-blue"></span><span>DBMS Lab</span><em>11:15</em></div>
+                <div class="preview-row"><span class="bar b-green"></span><span>Computer Networks</span><em>2:00</em></div>
+              </div>
+              <div class="preview-progress"><span style="width:68%"></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head">
+      <h2>Everything you need, in one place</h2>
+      <p>Six tools that cover your day-to-day academic life.</p>
+    </div>
+    <div class="row g-4">
+      {% set features = [
+        ('bi-calendar3-week', 'Class Timetable', 'Build your weekly schedule and see today\'s classes at a glance.'),
+        ('bi-journal-check', 'VTU Exam Planner', 'Add your exam dates and watch the countdown to the next paper.'),
+        ('bi-folder2-open', 'Study Materials', 'Upload and organise PDFs by semester, subject and module.'),
+        ('bi-clipboard-check', 'Assignment Tracker', 'Track deadlines, priorities and status so nothing slips.'),
+        ('bi-check2-square', 'Task Management', 'Plan your study goals with categories, due dates and progress.'),
+        ('bi-briefcase', 'Placement Preparation', 'Track applications, practise aptitude and revise interview questions.')
+      ] %}
+      {% for icon, title, text in features %}
+      <div class="col-md-6 col-lg-4">
+        <div class="feature-card">
+          <div class="feature-icon"><i class="bi {{ icon }}"></i></div>
+          <h3>{{ title }}</h3>
+          <p>{{ text }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Benefits -->
+<section class="section section-alt" id="about">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5">
+        <h2>Why students use Smart Student Hub</h2>
+        <p class="text-muted-2">Engineering semesters move fast. This hub keeps your academic life in one organised, private space, so you can focus on learning.</p>
+      </div>
+      <div class="col-lg-7">
+        <ul class="benefit-list">
+          <li><i class="bi bi-check-circle-fill"></i><div><strong>Stay organized</strong><span>Classes, tasks and notes live together instead of across chats and notebooks.</span></div></li>
+          <li><i class="bi bi-check-circle-fill"></i><div><strong>Avoid missing deadlines</strong><span>Overdue and due-soon items are highlighted and surfaced on your dashboard.</span></div></li>
+          <li><i class="bi bi-check-circle-fill"></i><div><strong>Prepare for examinations</strong><span>A live countdown shows how many days remain for your next paper.</span></div></li>
+          <li><i class="bi bi-check-circle-fill"></i><div><strong>Access study materials easily</strong><span>Search and filter your own PDFs by subject, module and type.</span></div></li>
+          <li><i class="bi bi-check-circle-fill"></i><div><strong>Prepare for campus placements</strong><span>Track applications and practise aptitude and technical questions.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / Contact -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="cta">
+      <h2>Ready to get organised?</h2>
+      <p>Create a free account and set up your semester in minutes.</p>
+      <a class="btn btn-light btn-lg" href="{{ url_for('auth.register') }}">Create your account</a>
+    </div>
+    <p class="text-center text-muted-2 mt-4 mb-0">Questions? This is a student portfolio project &mdash; reach the developer through the project's GitHub repository.</p>
+    <p id="privacy" class="text-center text-muted-2 small mt-3 mb-0"><strong>Privacy:</strong> your timetable, assignments, tasks and files are private to your account. Passwords are stored only as secure hashes.</p>
+  </div>
+</section>
+
+<footer class="landing-footer">
+  <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+    <a class="brand" href="#home"><span class="brand-mark"><i class="bi bi-mortarboard-fill"></i></span><span>Smart Student Hub</span></a>
+    <div class="footer-links">
+      <a href="#about">About</a><a href="#features">Features</a><a href="#contact">Contact</a><a href="#privacy">Privacy</a>
+    </div>
+    <small>&copy; {{ today.year }} Smart Student Hub. All rights reserved.</small>
+  </div>
+</footer>
+{% endblock %}

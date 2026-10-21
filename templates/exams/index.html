@@ -1,0 +1,63 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, delete_button, empty_state %}
+{% block title %}VTU Exam Timetable{% endblock %}
+{% block content %}
+{% call page_head('VTU Exam Timetable', 'Enter your exam dates manually. Nothing here comes from VTU unless you mark it verified.') %}
+  <a class="btn btn-primary" href="{{ url_for('exams.new') }}"><i class="bi bi-plus-lg"></i> Add exam</a>
+{% endcall %}
+
+{% if next_exam %}
+<div class="countdown">
+  <div class="num">{{ next_exam.days_remaining }}</div>
+  <div><strong>{{ 'day' if next_exam.days_remaining == 1 else 'days' }} until your next exam</strong>
+    <small>{{ next_exam.subject_name }} &middot; {{ next_exam.exam_date.strftime('%A, %d %b %Y') }}</small></div>
+</div>
+{% endif %}
+
+<div class="pill-tabs">
+  {% for key, label in [('upcoming', 'Upcoming'), ('completed', 'Completed'), ('all', 'All')] %}
+    <a class="{{ 'active' if view == key }}" href="{{ url_for('exams.index', view=key, q=q, semester=semester) }}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+<form class="filter-bar" method="get">
+  <input type="hidden" name="view" value="{{ view }}">
+  <div class="grow"><label for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Subject or code"></div>
+  <div><label for="semester">Semester</label>
+    <select class="form-select" id="semester" name="semester"><option value="">All</option>
+      {% for s in range(1, 9) %}<option value="{{ s }}" {{ 'selected' if semester == s|string }}>{{ s }}</option>{% endfor %}
+    </select></div>
+  <button class="btn btn-primary btn-sm">Apply</button>
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('exams.index') }}">Clear</a>
+</form>
+
+{% if exams %}
+<div class="table-card table-responsive-x"><table class="data-table">
+  <thead><tr><th>Date</th><th>Subject</th><th>Time / venue</th><th>Countdown</th><th>Source</th><th></th></tr></thead>
+  <tbody>
+  {% for e in exams %}
+    <tr>
+      <td><strong>{{ e.exam_date.strftime('%d %b %Y') }}</strong><span class="sub">{{ e.exam_date.strftime('%A') }}</span></td>
+      <td><strong>{{ e.subject_name }}</strong><span class="sub">{{ e.subject_code or '' }}{% if e.semester %} &middot; Sem {{ e.semester }}{% endif %}</span>
+        {% if e.notes %}<span class="sub">{{ e.notes }}</span>{% endif %}</td>
+      <td>{% if e.start_time %}{{ e.start_time.strftime('%I:%M %p').lstrip('0') }}{% if e.end_time %} - {{ e.end_time.strftime('%I:%M %p').lstrip('0') }}{% endif %}{% elif e.session %}{{ e.session }}{% else %}-{% endif %}
+        <span class="sub">{{ e.venue or '' }}</span></td>
+      <td>
+        {% if e.days_remaining < 0 %}<span class="tag tag-muted">Completed</span>
+        {% elif e.days_remaining == 0 %}<span class="tag tag-danger">Today</span>
+        {% elif e.days_remaining <= 7 %}<span class="tag tag-warning">{{ e.days_remaining }} days</span>
+        {% else %}<span class="tag tag-info">{{ e.days_remaining }} days</span>{% endif %}
+      </td>
+      <td><span class="tag {{ 'tag-success' if e.verification_status == 'Verified' else 'tag-muted' }}">{{ e.verification_status }}</span>
+        {% if e.source %}<span class="sub">{{ e.source }}</span>{% endif %}</td>
+      <td class="actions">
+        <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('exams.edit', exam_id=e.id) }}"><i class="bi bi-pencil"></i></a>
+        {{ delete_button(url_for('exams.delete', exam_id=e.id), 'Delete the ' ~ e.subject_name ~ ' exam?', '') }}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody></table></div>
+{% else %}
+  {{ empty_state('bi-journal-text', 'No exams to show', 'Add the dates from your official VTU timetable to get a countdown.', url_for('exams.new'), 'Add exam') }}
+{% endif %}
+{% endblock %}

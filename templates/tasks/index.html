@@ -1,0 +1,55 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, delete_button, action_button, empty_state %}
+{% block title %}My Tasks{% endblock %}
+{% block content %}
+{% call page_head('My Tasks', 'Plan your study goals and personal to-dos.') %}
+  <a class="btn btn-primary" href="{{ url_for('tasks.new') }}"><i class="bi bi-plus-lg"></i> Add task</a>
+{% endcall %}
+
+<div class="card-box mb-3">
+  <div class="d-flex justify-content-between mb-2"><strong>Progress: {{ done }} of {{ total }} completed</strong><span>{{ percent }}%</span></div>
+  <div class="progress"><div class="progress-bar" style="width: {{ percent }}%"></div></div>
+  <div class="mt-2 small text-muted-2">{{ due_today }} due today &middot; {{ overdue }} overdue</div>
+</div>
+
+<div class="pill-tabs">
+  {% for key, label in [('', 'All'), ('today', 'Due today'), ('open', 'Open'), ('overdue', 'Overdue'), ('done', 'Completed')] %}
+    <a class="{{ 'active' if status == key }}" href="{{ url_for('tasks.index', status=key, q=q, category=category, priority=priority) }}">{{ label }}</a>
+  {% endfor %}
+</div>
+<form class="filter-bar" method="get">
+  <input type="hidden" name="status" value="{{ status }}">
+  <div class="grow"><label for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Title or description"></div>
+  <div><label for="category">Category</label><select class="form-select" id="category" name="category"><option value="">All</option>
+    {% for c in categories %}<option {{ 'selected' if c == category }}>{{ c }}</option>{% endfor %}</select></div>
+  <div><label for="priority">Priority</label><select class="form-select" id="priority" name="priority"><option value="">All</option>
+    {% for p in priorities %}<option {{ 'selected' if p == priority }}>{{ p }}</option>{% endfor %}</select></div>
+  <button class="btn btn-primary btn-sm">Apply</button>
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('tasks.index') }}">Clear</a>
+</form>
+
+{% if tasks %}
+<div class="table-card table-responsive-x"><table class="data-table">
+  <thead><tr><th style="width:44px"></th><th>Task</th><th>Due</th><th>Priority</th><th></th></tr></thead><tbody>
+  {% for t in tasks %}
+  <tr>
+    <td>{{ action_button(url_for('tasks.toggle', task_id=t.id), '', 'bi-check-circle-fill' if t.is_completed else 'bi-circle', 'btn btn-sm btn-link p-0 fs-5 ' ~ ('text-success' if t.is_completed else 'text-secondary')) }}</td>
+    <td><strong class="{{ 'text-decoration-line-through text-muted-2' if t.is_completed }}">{{ t.title }}</strong>
+      <span class="sub">{{ t.category or 'General' }}{% if t.description %} &middot; {{ t.description[:80] }}{% endif %}</span></td>
+    <td>{% if t.due_date %}{{ t.due_date.strftime('%d %b %Y') }}{% if t.due_time %} {{ t.due_time.strftime('%I:%M %p').lstrip('0') }}{% endif %}
+        {% if not t.is_completed and t.due_date < today %}<span class="tag tag-danger">Overdue</span>
+        {% elif not t.is_completed and t.due_date == today %}<span class="tag tag-warning">Today</span>{% endif %}
+      {% else %}<span class="text-muted-2">No date</span>{% endif %}</td>
+    <td><span class="tag {{ {'High': 'tag-danger', 'Medium': 'tag-warning', 'Low': 'tag-muted'}[t.priority] }}">{{ t.priority }}</span></td>
+    <td class="actions">
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('tasks.edit', task_id=t.id) }}"><i class="bi bi-pencil"></i></a>
+      {{ delete_button(url_for('tasks.delete', task_id=t.id), 'Delete "' ~ t.title ~ '"?', '') }}
+    </td>
+  </tr>
+  {% endfor %}</tbody></table></div>
+{% elif total %}
+  {{ empty_state('bi-funnel', 'No tasks match these filters', 'Try clearing the filters.', url_for('tasks.index'), 'Clear filters') }}
+{% else %}
+  {{ empty_state('bi-check2-square', 'No tasks yet', 'Add a task such as "Complete Module 3 notes".', url_for('tasks.new'), 'Add task') }}
+{% endif %}
+{% endblock %}

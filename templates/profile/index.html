@@ -1,0 +1,19 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, field, select, form_buttons %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+{{ page_head('My Profile', 'Update your academic details.') }}
+<div class="form-card"><form method="post" novalidate data-loading-form>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-3">
+    <div class="col-md-6">{{ field('Full name', 'full_name', form.get('full_name'), required=True) }}</div>
+    <div class="col-md-6"><label class="form-label">Email</label><input class="form-control" value="{{ current_user.email }}" disabled><div class="form-text">Email cannot be changed.</div></div>
+    <div class="col-12">{{ field('College name', 'college_name', form.get('college_name'), required=True) }}</div>
+    <div class="col-md-6">{{ select('Branch', 'branch', branches, form.get('branch', ''), True, 'Choose...') }}</div>
+    <div class="col-md-3">{{ select('Semester', 'semester', ['1','2','3','4','5','6','7','8'], form.get('semester', ''), True) }}</div>
+    <div class="col-md-3">{{ select('Scheme', 'scheme', schemes, form.get('scheme', ''), blank='Not set') }}</div>
+  </div>
+  <p class="small text-muted-2 mt-3 mb-0">Member since {{ current_user.created_at.strftime('%d %b %Y') if current_user.created_at else '-' }}.</p>
+  {{ form_buttons(url_for('dashboard.index'), 'Save profile') }}
+</form></div>
+{% endblock %}

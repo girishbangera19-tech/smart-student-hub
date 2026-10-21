@@ -1,0 +1,77 @@
+/* Styles for the feature pages (timetable, exams, assignments, ...). Uses the shared variables. */
+
+/* more badge colours (the base ones live in dashboard.css) */
+.tag-success { background: #DCFCE7; color: #15803D; }
+.tag-warning { background: #FEF3C7; color: #92400E; }
+.tag-info { background: #DBEAFE; color: #1D4ED8; }
+.tag-primary { background: var(--primary-soft); color: var(--primary); }
+[data-theme="dark"] .tag-success, [data-theme="dark"] .tag-warning, [data-theme="dark"] .tag-info, [data-theme="dark"] .tag-danger { background: var(--surface-2); }
+[data-theme="dark"] .tag-success { color: #4ADE80; } [data-theme="dark"] .tag-warning { color: #FBBF24; }
+[data-theme="dark"] .tag-info { color: #60A5FA; } [data-theme="dark"] .tag-danger { color: #F87171; }
+
+.empty-state.big { padding: 3rem 1rem; }
+.empty-state.big i { font-size: 2.6rem; }
+
+/* filter bar */
+.filter-bar { display: flex; flex-wrap: wrap; gap: .6rem; align-items: end; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: .8rem; margin-bottom: 1rem; }
+.filter-bar .form-control, .filter-bar .form-select { padding: .4rem .65rem; font-size: .9rem; min-width: 140px; }
+.filter-bar label { font-size: .72rem; color: var(--text-muted); margin-bottom: .15rem; display: block; }
+.filter-bar .grow { flex: 1; min-width: 200px; }
+
+/* pill tabs */
+.pill-tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1rem; }
+.pill-tabs a { padding: .35rem .85rem; border-radius: 99px; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-size: .85rem; font-weight: 500; }
+.pill-tabs a:hover { color: var(--text); border-color: var(--primary); }
+.pill-tabs a.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+/* tables */
+.table-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-sm); }
+.data-table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.data-table th { text-align: left; font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); background: var(--surface-2); padding: .65rem .9rem; white-space: nowrap; }
+.data-table td { padding: .75rem .9rem; border-top: 1px solid var(--border); vertical-align: middle; }
+.data-table tbody tr:hover { background: var(--surface-2); }
+.data-table .sub { display: block; font-size: .8rem; color: var(--text-muted); }
+.data-table .actions { white-space: nowrap; text-align: right; }
+.table-responsive-x { overflow-x: auto; }
+
+/* timetable cards: left border colour per subject */
+.day-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; height: 100%; }
+.day-card.today { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-soft); }
+.day-card h3 { font-size: .95rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; margin-bottom: .7rem; }
+.class-item { border-left: 4px solid var(--primary); background: var(--surface-2); border-radius: var(--radius-sm); padding: .55rem .7rem; margin-bottom: .55rem; }
+.class-item strong { display: block; font-size: .9rem; }
+.class-item small { display: block; color: var(--text-muted); font-size: .78rem; }
+.class-item .actions { margin-top: .4rem; display: flex; gap: .4rem; }
+.subj-0 { border-left-color: #4F46E5; } .subj-1 { border-left-color: #2563EB; } .subj-2 { border-left-color: #16A34A; }
+.subj-3 { border-left-color: #F59E0B; } .subj-4 { border-left-color: #DB2777; } .subj-5 { border-left-color: #0891B2; }
+
+/* countdown banner */
+.countdown { display: flex; align-items: center; gap: 1rem; background: var(--primary); color: #fff; border-radius: var(--radius); padding: 1rem 1.3rem; margin-bottom: 1rem; }
+.countdown .num { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+.countdown small { opacity: .85; display: block; }
+
+/* forms and detail pages */
+.form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; max-width: 780px; box-shadow: var(--shadow-sm); }
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.detail-grid dt { font-size: .72rem; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); font-weight: 600; }
+.detail-grid dd { margin: 0; font-weight: 500; }
+.prose { white-space: pre-wrap; }
+.progress { height: 10px; border-radius: 99px; background: var(--surface-2); }
+.progress-bar { background: var(--success); }
+
+/* aptitude */
+.quiz-q { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.3rem; margin-bottom: 1rem; }
+.quiz-q h3 { font-size: 1rem; font-weight: 600; margin-bottom: .8rem; }
+.quiz-option { display: flex; gap: .6rem; align-items: center; padding: .5rem .75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: .4rem; cursor: pointer; }
+.quiz-option:hover { border-color: var(--primary); background: var(--primary-soft); }
+.quiz-option.correct { border-color: var(--success); background: #DCFCE7; color: #14532D; }
+.quiz-option.wrong { border-color: var(--danger); background: #FEE2E2; color: #7F1D1D; }
+.explain { background: var(--surface-2); border-radius: var(--radius-sm); padding: .6rem .8rem; font-size: .88rem; margin-top: .6rem; }
+.score-ring { font-size: 2.6rem; font-weight: 700; color: var(--primary); }
+
+/* notifications */
+.notif { display: flex; gap: .9rem; align-items: flex-start; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: .9rem 1.1rem; margin-bottom: .6rem; }
+.notif.unread { border-left: 4px solid var(--primary); background: var(--primary-soft); }
+.notif .icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--surface-2); color: var(--primary); flex-shrink: 0; }
+.notif .body { flex: 1; min-width: 0; }
+.notif small { color: var(--text-muted); }

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{# Layout for every logged-in page: sticky sidebar + top bar. Child pages fill `content`. #}
+{% block head %}
+  <link href="{{ url_for('static', filename='css/dashboard.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/pages.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block body_class %}app-body{% endblock %}
+
+{% block body %}
+<div class="app-shell">
+
+  <aside class="sidebar" id="sidebar">
+    <a href="{{ url_for('dashboard.index') }}" class="brand">
+      <span class="brand-mark"><i class="bi bi-mortarboard-fill"></i></span>
+      <span>Smart Student Hub</span>
+    </a>
+
+    <nav class="sidebar-nav">
+      {% for label, endpoint, icon in nav_items %}
+        {% if endpoint_exists(endpoint) %}
+          <a href="{{ url_for(endpoint) }}" class="nav-link-item {% if request.endpoint == endpoint %}active{% endif %}">
+            <i class="bi {{ icon }}"></i><span>{{ label }}</span>
+            {% if endpoint == 'notifications.index' and unread_count %}
+              <span class="badge-count">{{ unread_count }}</span>
+            {% endif %}
+          </a>
+        {% else %}
+          {# Page not built yet: show it disabled rather than as a fake link #}
+          <span class="nav-link-item disabled" title="Coming in the next stage">
+            <i class="bi {{ icon }}"></i><span>{{ label }}</span><span class="soon">Soon</span>
+          </span>
+        {% endif %}
+      {% endfor %}
+    </nav>
+
+    <form method="post" action="{{ url_for('auth.logout') }}" class="sidebar-footer">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="nav-link-item logout-btn"><i class="bi bi-box-arrow-left"></i><span>Logout</span></button>
+    </form>
+  </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="main-area">
+    <header class="topbar">
+      <button class="icon-btn d-lg-none" id="sidebarToggle" aria-label="Open menu"><i class="bi bi-list"></i></button>
+
+      <form class="topbar-search" role="search" onsubmit="return false;">
+        <i class="bi bi-search"></i>
+        <input type="search" id="pageSearch" placeholder="Search this page…" aria-label="Search this page">
+      </form>
+
+      <div class="topbar-right">
+        <span class="topbar-date d-none d-md-inline"><i class="bi bi-calendar-event"></i> {{ today.strftime('%a, %d %b %Y') }}</span>
+
+        {% if endpoint_exists('notifications.index') %}
+          <a href="{{ url_for('notifications.index') }}" class="icon-btn position-relative" aria-label="Notifications">
+        {% else %}
+          <span class="icon-btn position-relative" aria-label="Notifications (coming soon)">
+        {% endif %}
+            <i class="bi bi-bell"></i>
+            {% if unread_count %}<span class="dot">{{ unread_count }}</span>{% endif %}
+        {% if endpoint_exists('notifications.index') %}</a>{% else %}</span>{% endif %}
+
+        <div class="dropdown">
+          <button class="profile-btn" data-bs-toggle="dropdown" aria-expanded="false">
+            <span class="avatar">{{ current_user.full_name[:1]|upper }}</span>
+            <span class="d-none d-md-inline">{{ current_user.full_name.split(' ')[0] }}</span>
+            <i class="bi bi-chevron-down small"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li class="dropdown-header">{{ current_user.email }}</li>
+            {% if endpoint_exists('profile.index') %}
+              <li><a class="dropdown-item" href="{{ url_for('profile.index') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+            {% endif %}
+            <li>
+              <form method="post" action="{{ url_for('auth.logout') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="dropdown-item" type="submit"><i class="bi bi-box-arrow-left me-2"></i>Logout</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+{% endblock %}

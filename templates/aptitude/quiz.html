@@ -1,0 +1,27 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head %}
+{% block title %}{{ category }} quiz{% endblock %}
+{% block content %}
+{{ page_head(category ~ ' quiz', 'Choose one answer for each question.') }}
+{% if result %}
+  <div class="card-box text-center mb-4"><div class="score-ring">{{ result.score }} / {{ result.total }}</div>
+    <p class="mb-2">{{ (result.score * 100 / result.total)|round|int }}% correct</p>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('aptitude.quiz', category=category) }}">Try again</a>
+    <a class="btn btn-ghost btn-sm" href="{{ url_for('aptitude.index') }}">All quizzes</a></div>
+{% endif %}
+<form method="post" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% for q in questions %}
+  {% set chosen = result.answers[q.id] if result else '' %}
+  <div class="quiz-q"><h3>{{ loop.index }}. {{ q.question }}</h3>
+    {% for key, text in [('a', q.option_a), ('b', q.option_b), ('c', q.option_c), ('d', q.option_d)] %}
+      <label class="quiz-option {% if result %}{{ 'correct' if key == q.correct_option else ('wrong' if key == chosen else '') }}{% endif %}">
+        <input type="radio" name="q_{{ q.id }}" value="{{ key }}" {{ 'checked' if chosen == key }} {{ 'disabled' if result }}> <span>{{ text }}</span>
+      </label>
+    {% endfor %}
+    {% if result %}<div class="explain"><strong>{{ 'Correct.' if chosen == q.correct_option else ('Not answered.' if not chosen else 'Incorrect.') }}</strong> {{ q.explanation }}</div>{% endif %}
+  </div>
+  {% endfor %}
+  {% if not result %}<button class="btn btn-primary" type="submit"><i class="bi bi-check2-all"></i> Submit answers</button>{% endif %}
+</form>
+{% endblock %}

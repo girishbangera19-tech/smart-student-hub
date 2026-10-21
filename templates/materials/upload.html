@@ -1,0 +1,22 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, field, textarea, select, form_buttons %}
+{% block title %}Upload material{% endblock %}
+{% block content %}
+{{ page_head('Upload study material', 'Allowed: PDF, DOC, DOCX, PPT, PPTX, TXT. Maximum size 10 MB.') }}
+<div class="form-card"><form method="post" enctype="multipart/form-data" novalidate data-loading-form>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-3">
+    <div class="col-12">{{ field('Title', 'title', form.get('title'), required=True) }}</div>
+    <div class="col-md-8">{{ field('Subject', 'subject_name', form.get('subject_name'), required=True) }}</div>
+    <div class="col-md-4">{{ field('Subject code', 'subject_code', form.get('subject_code')) }}</div>
+    <div class="col-md-4">{{ select('Resource type', 'resource_type', types, form.get('resource_type', ''), True, 'Choose...') }}</div>
+    <div class="col-md-3">{{ field('Semester', 'semester', form.get('semester'), 'number', attrs='min="1" max="8"') }}</div>
+    <div class="col-md-3">{{ field('Module', 'module_number', form.get('module_number'), 'number', attrs='min="1" max="10"') }}</div>
+    <div class="col-md-2">{{ field('Scheme', 'scheme', form.get('scheme')) }}</div>
+    <div class="col-12">{{ textarea('Description', 'description', form.get('description'), 2) }}</div>
+    <div class="col-12"><label class="form-label" for="file">File <span class="text-danger">*</span></label>
+      <input class="form-control" type="file" id="file" name="file" required accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"></div>
+  </div>
+  {{ form_buttons(url_for('materials.index'), 'Upload') }}
+</form></div>
+{% endblock %}

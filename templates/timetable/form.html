@@ -1,0 +1,24 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, field, textarea, select, form_buttons %}
+{% block title %}{{ 'Edit class' if entry else 'Add class' }}{% endblock %}
+
+{% block content %}
+{% set day_options = [] %}{% for d in days %}{% set _ = day_options.append((loop.index0, d)) %}{% endfor %}
+{{ page_head('Edit class' if entry else 'Add class', 'Times use the 12-hour or 24-hour format of your browser.') }}
+<div class="form-card">
+  <form method="post" novalidate data-loading-form>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <div class="row g-3">
+      <div class="col-md-8">{{ field('Subject', 'subject_name', form.get('subject_name'), required=True) }}</div>
+      <div class="col-md-4">{{ field('Subject code', 'subject_code', form.get('subject_code'), placeholder='e.g. BCS503') }}</div>
+      <div class="col-md-4">{{ select('Day', 'day_of_week', day_options, form.get('day_of_week', ''), required=True, blank='Choose day') }}</div>
+      <div class="col-md-4">{{ field('Start time', 'start_time', form.get('start_time'), 'time', True) }}</div>
+      <div class="col-md-4">{{ field('End time', 'end_time', form.get('end_time'), 'time', True) }}</div>
+      <div class="col-md-6">{{ field('Faculty name', 'faculty_name', form.get('faculty_name')) }}</div>
+      <div class="col-md-6">{{ field('Room / lab', 'room', form.get('room')) }}</div>
+      <div class="col-12">{{ textarea('Notes (optional)', 'notes', form.get('notes'), 2) }}</div>
+    </div>
+    {{ form_buttons(url_for('timetable.index'), 'Save changes' if entry else 'Add class') }}
+  </form>
+</div>
+{% endblock %}

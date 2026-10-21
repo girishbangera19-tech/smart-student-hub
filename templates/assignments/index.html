@@ -1,0 +1,53 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, delete_button, action_button, empty_state %}
+{% block title %}Assignments{% endblock %}
+{% block content %}
+{% call page_head('Assignments', 'Track deadlines, priorities and progress.') %}
+  <a class="btn btn-primary" href="{{ url_for('assignments.new') }}"><i class="bi bi-plus-lg"></i> Add assignment</a>
+{% endcall %}
+
+<form class="filter-bar" method="get">
+  <div class="grow"><label for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Title, subject, description"></div>
+  <div><label for="subject">Subject</label><select class="form-select" id="subject" name="subject"><option value="">All</option>
+    {% for s in subjects %}<option {{ 'selected' if s == subject }}>{{ s }}</option>{% endfor %}</select></div>
+  <div><label for="priority">Priority</label><select class="form-select" id="priority" name="priority"><option value="">All</option>
+    {% for p in priorities %}<option {{ 'selected' if p == priority }}>{{ p }}</option>{% endfor %}</select></div>
+  <div><label for="status">Status</label><select class="form-select" id="status" name="status"><option value="">All</option>
+    {% for s in statuses + ['Overdue'] %}<option {{ 'selected' if s == status }}>{{ s }}</option>{% endfor %}</select></div>
+  <div><label for="sort">Sort</label><select class="form-select" id="sort" name="sort">
+    <option value="deadline" {{ 'selected' if sort == 'deadline' }}>Earliest deadline</option>
+    <option value="deadline_desc" {{ 'selected' if sort == 'deadline_desc' }}>Latest deadline</option></select></div>
+  <button class="btn btn-primary btn-sm">Apply</button>
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('assignments.index') }}">Clear</a>
+</form>
+
+{% if assignments %}
+<div class="table-card table-responsive-x"><table class="data-table">
+  <thead><tr><th>Assignment</th><th>Deadline</th><th>Priority</th><th>Status</th><th></th></tr></thead><tbody>
+  {% for a in assignments %}
+  {% set hours_left = (a.deadline - now).total_seconds() / 3600 %}
+  <tr>
+    <td><a href="{{ url_for('assignments.detail', assignment_id=a.id) }}"><strong>{{ a.title }}</strong></a>
+      <span class="sub">{{ a.subject_name }}{% if a.subject_code %} ({{ a.subject_code }}){% endif %}</span></td>
+    <td>{{ a.deadline.strftime('%d %b %Y, %I:%M %p') }}</td>
+    <td><span class="tag {{ {'High': 'tag-danger', 'Medium': 'tag-warning', 'Low': 'tag-muted'}[a.priority] }}">{{ a.priority }}</span></td>
+    <td>
+      {% if a.status == 'Completed' %}<span class="tag tag-success">Completed</span>
+      {% elif a.is_overdue %}<span class="tag tag-danger">Overdue</span>
+      {% elif hours_left <= 48 %}<span class="tag tag-warning">Due soon</span>
+      {% elif a.status == 'In Progress' %}<span class="tag tag-info">In Progress</span>
+      {% else %}<span class="tag tag-muted">{{ a.status }}</span>{% endif %}
+    </td>
+    <td class="actions">
+      {% if a.status != 'Completed' %}{{ action_button(url_for('assignments.complete', assignment_id=a.id), 'Done', 'bi-check-lg', 'btn btn-sm btn-outline-success') }}{% endif %}
+      <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('assignments.edit', assignment_id=a.id) }}"><i class="bi bi-pencil"></i></a>
+      {{ delete_button(url_for('assignments.delete', assignment_id=a.id), 'Delete "' ~ a.title ~ '"?', '') }}
+    </td>
+  </tr>
+  {% endfor %}</tbody></table></div>
+{% elif total %}
+  {{ empty_state('bi-funnel', 'No assignments match these filters', 'Try clearing the filters.', url_for('assignments.index'), 'Clear filters') }}
+{% else %}
+  {{ empty_state('bi-clipboard-check', 'No assignments yet', 'Add your first assignment to start tracking deadlines.', url_for('assignments.new'), 'Add assignment') }}
+{% endif %}
+{% endblock %}

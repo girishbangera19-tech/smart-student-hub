@@ -1,0 +1,37 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, empty_state %}
+{% block title %}Placements{% endblock %}
+{% block content %}
+{% call page_head('Placements', 'Listings are added by students and are NOT verified. Always confirm on the company website.') %}
+  <a class="btn btn-primary" href="{{ url_for('placements.new') }}"><i class="bi bi-plus-lg"></i> Add opportunity</a>
+{% endcall %}
+<div class="pill-tabs">
+  {% for key, label in [('open', 'Open'), ('tracked', 'My applications'), ('expired', 'Expired'), ('all', 'All')] %}
+    <a class="{{ 'active' if show == key }}" href="{{ url_for('placements.index', show=key) }}">{{ label }}</a>
+  {% endfor %}
+</div>
+<form class="filter-bar" method="get">
+  <input type="hidden" name="show" value="{{ show }}">
+  <div class="grow"><label for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Company, role or skill"></div>
+  {% if show == 'tracked' %}<div><label for="status">My status</label><select class="form-select" id="status" name="status"><option value="">All</option>
+    {% for s in statuses %}<option {{ 'selected' if s == status }}>{{ s }}</option>{% endfor %}</select></div>{% endif %}
+  <button class="btn btn-primary btn-sm">Apply</button>
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('placements.index', show=show) }}">Clear</a>
+</form>
+{% if items %}
+<div class="table-card table-responsive-x"><table class="data-table">
+  <thead><tr><th>Role</th><th>Package / location</th><th>Min CGPA</th><th>Deadline</th><th>My status</th></tr></thead><tbody>
+  {% for o in items %}
+  <tr>
+    <td><a href="{{ url_for('placements.detail', item_id=o.id) }}"><strong>{{ o.job_title }}</strong></a>
+      <span class="sub">{{ o.company_name }} {% if not o.is_verified %}<span class="tag tag-muted">Unverified</span>{% endif %}</span></td>
+    <td>{{ o.salary_package or '-' }}<span class="sub">{{ o.location or '' }}</span></td>
+    <td>{{ o.min_cgpa if o.min_cgpa is not none else '-' }}</td>
+    <td>{% if o.deadline %}{{ o.deadline.strftime('%d %b %Y') }}{% if o.is_expired %} <span class="tag tag-danger">Expired</span>{% endif %}{% else %}-{% endif %}</td>
+    <td>{% if o.id in mine %}<span class="tag tag-info">{{ mine[o.id].status }}</span>{% else %}<span class="text-muted-2">Not tracking</span>{% endif %}</td>
+  </tr>
+  {% endfor %}</tbody></table></div>
+{% else %}
+  {{ empty_state('bi-briefcase', 'Nothing to show here', 'Add an opportunity you found, or switch tabs.', url_for('placements.new'), 'Add opportunity') }}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, field, textarea, select, form_buttons %}
+{% block title %}{{ 'Edit opportunity' if item else 'Add opportunity' }}{% endblock %}
+{% block content %}
+{{ page_head('Edit opportunity' if item else 'Add opportunity', 'New listings are saved as unverified.') }}
+<div class="form-card"><form method="post" novalidate data-loading-form>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div class="row g-3">
+    <div class="col-md-6">{{ field('Company', 'company_name', form.get('company_name'), required=True) }}</div>
+    <div class="col-md-6">{{ field('Job role', 'job_title', form.get('job_title'), required=True) }}</div>
+    <div class="col-12">{{ textarea('Job description', 'description', form.get('description'), 3) }}</div>
+    <div class="col-12">{{ textarea('Eligibility', 'eligibility', form.get('eligibility'), 2) }}</div>
+    <div class="col-md-4">{{ field('Minimum CGPA', 'min_cgpa', form.get('min_cgpa'), 'number', attrs='min="0" max="10" step="0.1"') }}</div>
+    <div class="col-md-8">{{ field('Eligible branches', 'eligible_branches', form.get('eligible_branches'), placeholder='CSE, ISE, ECE') }}</div>
+    <div class="col-12">{{ field('Required skills', 'required_skills', form.get('required_skills'), placeholder='Python, SQL') }}</div>
+    <div class="col-md-4">{{ field('Salary package', 'salary_package', form.get('salary_package'), placeholder='e.g. 6 LPA') }}</div>
+    <div class="col-md-4">{{ field('Location', 'location', form.get('location')) }}</div>
+    <div class="col-md-4">{{ select('Type', 'employment_type', employment, form.get('employment_type', ''), blank='Not set') }}</div>
+    <div class="col-md-4">{{ field('Application deadline', 'deadline', form.get('deadline'), 'date') }}</div>
+    <div class="col-md-8">{{ field('Application URL', 'application_url', form.get('application_url'), 'url', placeholder='https://') }}</div>
+  </div>
+  {{ form_buttons(url_for('placements.index'), 'Save changes' if item else 'Add opportunity') }}
+</form></div>
+{% endblock %}

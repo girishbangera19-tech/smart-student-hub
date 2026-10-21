@@ -1,0 +1,21 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, delete_button, action_button %}
+{% block title %}{{ a.title }}{% endblock %}
+{% block content %}
+{% call page_head(a.title, a.subject_name ~ (' (' ~ a.subject_code ~ ')' if a.subject_code else '')) %}
+  {% if a.status != 'Completed' %}{{ action_button(url_for('assignments.complete', assignment_id=a.id), 'Mark completed', 'bi-check-lg', 'btn btn-success') }}{% endif %}
+  <a class="btn btn-outline-primary" href="{{ url_for('assignments.edit', assignment_id=a.id) }}"><i class="bi bi-pencil"></i> Edit</a>
+  {{ delete_button(url_for('assignments.delete', assignment_id=a.id), 'Delete "' ~ a.title ~ '"?') }}
+{% endcall %}
+<div class="form-card">
+  <dl class="detail-grid">
+    <div><dt>Deadline</dt><dd>{{ a.deadline.strftime('%A, %d %b %Y, %I:%M %p') }}</dd></div>
+    <div><dt>Assigned</dt><dd>{{ a.assigned_date.strftime('%d %b %Y') if a.assigned_date else '-' }}</dd></div>
+    <div><dt>Priority</dt><dd>{{ a.priority }}</dd></div>
+    <div><dt>Status</dt><dd>{% if a.is_overdue %}<span class="tag tag-danger">Overdue</span>{% else %}{{ a.status }}{% endif %}</dd></div>
+  </dl>
+  <h2 class="h6">Description</h2>
+  <p class="prose mb-0">{{ a.description or 'No description added.' }}</p>
+</div>
+<a class="btn btn-ghost mt-3" href="{{ url_for('assignments.index') }}"><i class="bi bi-arrow-left"></i> Back to assignments</a>
+{% endblock %}

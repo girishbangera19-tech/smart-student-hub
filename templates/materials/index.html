@@ -1,0 +1,53 @@
+{% extends "app_layout.html" %}
+{% from "macros.html" import page_head, delete_button, empty_state %}
+{% block title %}Study Materials{% endblock %}
+{% block content %}
+{% call page_head('Study Materials', 'Your private library. Only upload files you are allowed to share or keep.') %}
+  <a class="btn btn-primary" href="{{ url_for('materials.upload') }}"><i class="bi bi-cloud-arrow-up"></i> Upload</a>
+{% endcall %}
+<form class="filter-bar" method="get">
+  <div class="grow"><label for="q">Search</label><input class="form-control" id="q" name="q" value="{{ q }}" placeholder="Title, subject, code"></div>
+  <div><label for="subject">Subject</label><select class="form-select" id="subject" name="subject"><option value="">All</option>
+    {% for s in subjects %}<option {{ 'selected' if s == subject }}>{{ s }}</option>{% endfor %}</select></div>
+  <div><label for="type">Type</label><select class="form-select" id="type" name="type"><option value="">All</option>
+    {% for t in types %}<option {{ 'selected' if t == rtype }}>{{ t }}</option>{% endfor %}</select></div>
+  <div><label for="semester">Sem</label><select class="form-select" id="semester" name="semester" style="min-width:80px"><option value="">All</option>
+    {% for s in range(1, 9) %}<option value="{{ s }}" {{ 'selected' if semester == s|string }}>{{ s }}</option>{% endfor %}</select></div>
+  <div><label for="module">Module</label><select class="form-select" id="module" name="module" style="min-width:90px"><option value="">All</option>
+    {% for m in range(1, 6) %}<option value="{{ m }}" {{ 'selected' if module == m|string }}>{{ m }}</option>{% endfor %}</select></div>
+  <div><label for="sort">Sort</label><select class="form-select" id="sort" name="sort">
+    <option value="newest" {{ 'selected' if sort == 'newest' }}>Newest</option><option value="oldest" {{ 'selected' if sort == 'oldest' }}>Oldest</option></select></div>
+  <button class="btn btn-primary btn-sm">Apply</button>
+  <a class="btn btn-ghost btn-sm" href="{{ url_for('materials.index') }}">Clear</a>
+</form>
+
+{% if materials %}
+<div class="row g-3">
+  {% for m in materials %}
+  <div class="col-md-6 col-xl-4" data-searchable>
+    <div class="card-box h-100 d-flex flex-column">
+      <div class="d-flex gap-3 mb-2">
+        <span class="file-icon"><i class="bi bi-file-earmark-{{ 'pdf' if m.stored_filename.endswith('.pdf') else 'text' }}"></i></span>
+        <div style="min-width:0"><strong class="d-block text-truncate">{{ m.title }}</strong>
+          <small class="text-muted-2">{{ m.subject_name }}{% if m.subject_code %} ({{ m.subject_code }}){% endif %}</small></div>
+      </div>
+      <div class="mb-2"><span class="tag tag-primary">{{ m.resource_type }}</span>
+        {% if m.semester %}<span class="tag tag-muted">Sem {{ m.semester }}</span>{% endif %}
+        {% if m.module_number %}<span class="tag tag-muted">Module {{ m.module_number }}</span>{% endif %}</div>
+      {% if m.description %}<p class="small text-muted-2">{{ m.description[:120] }}</p>{% endif %}
+      <small class="text-muted-2 mt-auto">{{ m.original_filename }} &middot; {{ '%.1f'|format((m.file_size or 0) / 1024 / 1024) }} MB &middot; {{ m.uploaded_at.strftime('%d %b %Y') }}</small>
+      <div class="d-flex gap-2 mt-3">
+        <a class="btn btn-sm btn-primary" href="{{ url_for('materials.download', material_id=m.id) }}"><i class="bi bi-download"></i> Download</a>
+        {% if m.stored_filename.endswith('.pdf') %}<a class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener" href="{{ url_for('materials.download', material_id=m.id, inline=1) }}"><i class="bi bi-eye"></i> Preview</a>{% endif %}
+        {{ delete_button(url_for('materials.delete', material_id=m.id), 'Delete "' ~ m.title ~ '"? The file will be removed.', '') }}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% elif total %}
+  {{ empty_state('bi-funnel', 'No materials match these filters', 'Try clearing the filters.', url_for('materials.index'), 'Clear filters') }}
+{% else %}
+  {{ empty_state('bi-folder2-open', 'No study materials yet', 'Upload your own notes, question papers and lab manuals.', url_for('materials.upload'), 'Upload material') }}
+{% endif %}
+{% endblock %}

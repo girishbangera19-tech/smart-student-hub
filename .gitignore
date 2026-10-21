@@ -1,0 +1,13 @@
+venv/
+.venv/
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+instance/
+*.db
+*.sqlite3
+static/uploads/*
+!static/uploads/.gitkeep
+*.tmp
+.vscode/

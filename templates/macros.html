@@ -1,0 +1,65 @@
+{# Reusable template pieces. Import with:  {% from "macros.html" import field, select ... %} #}
+
+{% macro page_head(title, subtitle='') %}
+<div class="page-head d-flex flex-wrap justify-content-between align-items-start gap-3">
+  <div>
+    <h1>{{ title }}</h1>
+    {% if subtitle %}<p>{{ subtitle }}</p>{% endif %}
+  </div>
+  <div class="d-flex flex-wrap gap-2">{% if caller %}{{ caller() }}{% endif %}</div>
+</div>
+{% endmacro %}
+
+{% macro field(label, name, value='', type='text', required=False, placeholder='', help='', attrs='') %}
+<label class="form-label" for="{{ name }}">{{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}</label>
+<input class="form-control" type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value if value is not none else '' }}"
+       placeholder="{{ placeholder }}" {{ 'required' if required }} {{ attrs|safe }}>
+{% if help %}<div class="form-text">{{ help }}</div>{% endif %}
+{% endmacro %}
+
+{% macro textarea(label, name, value='', rows=3, required=False) %}
+<label class="form-label" for="{{ name }}">{{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}</label>
+<textarea class="form-control" id="{{ name }}" name="{{ name }}" rows="{{ rows }}" {{ 'required' if required }}>{{ value or '' }}</textarea>
+{% endmacro %}
+
+{# options: list of strings, or list of (value, label) pairs #}
+{% macro select(label, name, options, selected='', required=False, blank=None) %}
+<label class="form-label" for="{{ name }}">{{ label }}{% if required %} <span class="text-danger">*</span>{% endif %}</label>
+<select class="form-select" id="{{ name }}" name="{{ name }}" {{ 'required' if required }}>
+  {% if blank is not none %}<option value="">{{ blank }}</option>{% endif %}
+  {% for opt in options %}
+    {% if opt is string %}{% set val = opt %}{% set text = opt %}{% else %}{% set val = opt[0] %}{% set text = opt[1] %}{% endif %}
+    <option value="{{ val }}" {{ 'selected' if val|string == selected|string }}>{{ text }}</option>
+  {% endfor %}
+</select>
+{% endmacro %}
+
+{# A small POST form with a CSRF token. data-confirm makes main.js ask before submitting. #}
+{% macro action_button(url, label, icon='', classes='btn btn-sm btn-outline-secondary', confirm='') %}
+<form method="post" action="{{ url }}" class="d-inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button type="submit" class="{{ classes }}" {% if confirm %}data-confirm="{{ confirm }}"{% endif %}>
+    {% if icon %}<i class="bi {{ icon }}"></i> {% endif %}{{ label }}
+  </button>
+</form>
+{% endmacro %}
+
+{% macro delete_button(url, message, label='Delete') %}
+{{ action_button(url, label, 'bi-trash', 'btn btn-sm btn-outline-danger', message) }}
+{% endmacro %}
+
+{% macro empty_state(icon, title, text, url=None, action='') %}
+<div class="empty-state big">
+  <i class="bi {{ icon }}"></i><strong>{{ title }}</strong><span>{{ text }}</span>
+  {% if url %}<a class="btn btn-primary btn-sm mt-2" href="{{ url }}"><i class="bi bi-plus-lg"></i> {{ action }}</a>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro badge(text, kind='muted') %}<span class="tag tag-{{ kind }}">{{ text }}</span>{% endmacro %}
+
+{% macro form_buttons(cancel_url, label='Save') %}
+<div class="d-flex gap-2 mt-4">
+  <button class="btn btn-primary" type="submit"><i class="bi bi-check-lg"></i> {{ label }}</button>
+  <a class="btn btn-ghost" href="{{ cancel_url }}">Cancel</a>
+</div>
+{% endmacro %}
